@@ -5,11 +5,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const urls = process.env.FORWARD_URLS?.split(",") || [];
 
   if (!urls.length) {
-    return res
-      .status(500)
-      .json({
-        error: "No URLs provided in the environment variable FORWARD_URLS",
-      });
+    return res.status(500).json({
+      error: "No URLs provided in the environment variable FORWARD_URLS",
+    });
   }
 
   try {
