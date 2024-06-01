@@ -11,6 +11,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    delete req.headers.host;
+    delete req.headers.referer;
     const responses = await Promise.all(
       urls.map((url) =>
         fetch(url, {
