@@ -13,15 +13,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     delete req.headers.host;
     delete req.headers.referer;
+    console.log("body", req.body);
     const responses = await Promise.all(
       urls.map((url) =>
         fetch(url, {
           method: req.method,
           headers: req.headers as any,
-          body:
-            req.method !== "GET" && req.method !== "HEAD"
-              ? req.body
-              : undefined,
+          body: req.body,
         })
       )
     );
