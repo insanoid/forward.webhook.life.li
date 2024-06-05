@@ -13,7 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const specificUrls = process.env[key.toUpperCase()]?.split(",") || [];
-  const sharedUrls = process.env.FORWARD_URLS?.split(",") || [];
+  const sharedUrls = process.env.SHARED_FORWARD_URL?.split(",") || [];
 
   if (!specificUrls.length && !sharedUrls.length) {
     return res
