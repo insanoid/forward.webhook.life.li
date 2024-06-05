@@ -5,7 +5,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const urls = process.env.FORWARD_URLS?.split(",") || [];
 
   if (!urls.length) {
-    return res.status(500).json({
+    return res.status(400).json({
       error: "No URLs provided in the environment variable FORWARD_URLS",
     });
   }
@@ -17,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     delete headers.host;
 
     let body;
-    console.log("req.method.body", req.body, JSON.stringify(req));
+    console.log("req.method.body", req.body, req.headers);
     if (req.method !== "GET" && req.method !== "HEAD") {
       if (
         req.headers["content-type"]?.includes(
