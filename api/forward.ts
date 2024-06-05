@@ -1,5 +1,6 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import fetch from "node-fetch";
+import getRawBody from "raw-body";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const urls = process.env.FORWARD_URLS?.split(",") || [];
@@ -17,19 +18,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     delete headers.host;
 
     let body;
-    console.log("req.method.body", req.body, req.headers);
     if (req.method !== "GET" && req.method !== "HEAD") {
-      if (
-        req.headers["content-type"]?.includes(
-          "application/x-www-form-urlencoded"
-        )
-      ) {
-        const formData = new URLSearchParams(req.body).toString();
-        body = formData;
-      } else if (req.headers["content-type"]?.includes("multipart/form-data")) {
-        body = req.body;
+      const rawBody = await getRawBody(req);
+      const contentType = req.headers["content-type"];
+
+      if (contentType?.includes("application/x-www-form-urlencoded")) {
+        body = new URLSearchParams(rawBody.toString()).toString();
+      } else if (contentType?.includes("multipart/form-data")) {
+        body = rawBody;
       } else {
-        body = JSON.stringify(req.body);
+        body = rawBody.toString();
       }
     }
 
