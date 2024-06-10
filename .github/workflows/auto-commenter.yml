@@ -23,6 +23,8 @@ jobs:
           echo "::set-output name=sha::${{ github.event.pull_request.head.sha }}"
 
       - name: List Changed Files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         id: changed-files
         run: |
           CHANGED_FILES=$(gh pr view ${{ steps.pr-details.outputs.pr_number }} --json files --jq '.files[].path')
