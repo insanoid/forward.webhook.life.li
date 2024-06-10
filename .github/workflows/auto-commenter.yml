@@ -2,7 +2,7 @@ name: Comment on First Line
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, reopened]
 
 jobs:
   comment-on-first-line:
