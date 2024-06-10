@@ -15,19 +15,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Get PR Details
+        id: pr-details
+        run: |
+          echo "::set-output name=pr_number::${{ github.event.pull_request.number }}"
+          echo "::set-output name=repo::${{ github.repository }}"
+          echo "::set-output name=sha::${{ github.event.pull_request.head.sha }}"
+
+      - name: List Changed Files
+        id: changed-files
+        run: |
+          CHANGED_FILES=$(gh pr view ${{ steps.pr-details.outputs.pr_number }} --json files --jq '.files[].path')
+          echo "::set-output name=files::${CHANGED_FILES}"
+
       - name: Comment on first line of each file
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          REPO=$(jq --raw-output .repository.full_name "$GITHUB_EVENT_PATH")
-          FILES=$(jq --raw-output '.pull_request.head.repo.full_name' "$GITHUB_EVENT_PATH")
+          PR_NUMBER=${{ steps.pr-details.outputs.pr_number }}
+          REPO=${{ steps.pr-details.outputs.repo }}
+          SHA=${{ steps.pr-details.outputs.sha }}
+          FILES="${{ steps.changed-files.outputs.files }}"
 
-          for FILE in $(gh pr diff $PR_NUMBER --name-only); do
-            COMMENT_BODY="Automated Comment: Check the first line of code."
-            PAYLOAD=$(jq -n --arg body "$COMMENT_BODY" --arg path "$FILE" --arg pr_number "$PR_NUMBER" '{
+          IFS=$'\n'
+          for FILE in $FILES; do
+            COMMENT_BODY="Automated Comment: Check the first line of code in ${FILE}."
+            PAYLOAD=$(jq -n --arg body "$COMMENT_BODY" --arg path "$FILE" --arg sha "$SHA" '{
               "body": $body,
-              "commit_id": $pr_number,
+              "commit_id": $sha,
               "path": $path,
               "position": 1
             }')
