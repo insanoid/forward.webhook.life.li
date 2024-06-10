@@ -1,0 +1,17 @@
+name: Comment on First Line
+
+on:
+  pull_request:
+    types: [opened, reopened]
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  auto_comment:
+    uses: prosperity-tech/.github/.github/workflows/pr-blocking-commentor.yml@main
+    secrets:
+      GITHUB_BOT_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
