@@ -3,51 +3,15 @@ name: Comment on First Line
 on:
   pull_request:
     types: [opened, reopened]
+    branches:
+      - main
 
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
-  comment-on-first-line:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Get PR Details
-        id: pr-details
-        run: |
-          echo "::set-output name=pr_number::${{ github.event.pull_request.number }}"
-          echo "::set-output name=repo::${{ github.repository }}"
-          echo "::set-output name=sha::${{ github.event.pull_request.head.sha }}"
-
-      - name: List Changed Files
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        id: changed-files
-        run: |
-          CHANGED_FILES=$(gh pr view ${{ steps.pr-details.outputs.pr_number }} --json files --jq '.files[].path')
-          echo "::set-output name=files::${CHANGED_FILES}"
-
-      - name: Comment on first line of each file
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR_NUMBER=${{ steps.pr-details.outputs.pr_number }}
-          REPO=${{ steps.pr-details.outputs.repo }}
-          SHA=${{ steps.pr-details.outputs.sha }}
-          FILES="${{ steps.changed-files.outputs.files }}"
-
-          IFS=$'\n'
-          for FILE in $FILES; do
-            COMMENT_BODY="Automated Comment: Check the first line of code in ${FILE}."
-            PAYLOAD=$(jq -n --arg body "$COMMENT_BODY" --arg path "$FILE" --arg sha "$SHA" '{
-              "body": $body,
-              "commit_id": $sha,
-              "path": $path,
-              "position": 1
-            }')
-            curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/comments -d "$PAYLOAD"
-          done
+  auto_comment:
+    uses: prosperity-tech/.github/.github/workflows/pr-blocking-commentor.yml@main
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
