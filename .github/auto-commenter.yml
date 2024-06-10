@@ -1,0 +1,25 @@
+name: Comment on First Line
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  comment-on-first-line:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Comment on first line of each file
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          REPO=$(jq --raw-output .repository.full_name "$GITHUB_EVENT_PATH")
+          FILES=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json files --jq '.files[].path')
+
+          for FILE in $FILES; do
+            COMMENT_BODY="Automated Comment: Check the first line of code."
+            gh pr review --repo "$REPO" "$PR_NUMBER" --add-comment --body "$COMMENT_BODY" --path "$FILE" --position 1
+          done
