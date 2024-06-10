@@ -14,4 +14,4 @@ jobs:
   auto_comment:
     uses: prosperity-tech/.github/.github/workflows/pr-blocking-commentor.yml@main
     secrets:
-      GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+      GITHUB_BOT_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
